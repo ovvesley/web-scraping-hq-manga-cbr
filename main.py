@@ -1,19 +1,14 @@
 from bs4 import BeautifulSoup
 import requests
 import urllib
-import sys
-import io
-import progressbar
+from urllib.parse import quote
 import re
 
 url = "http://baixarquadrinhos.com/Hq-Quadrinho/ler-online-quadrinho-thanos-18-donny-cates-ou-baixar-em-cbr-e-pdf/"
 def get_link_downloads(url):
     page = requests.get(url)
     page_soup = BeautifulSoup(page.content, 'html.parser')
-    # print(page_soup.prettify())
     value = page_soup.find(attrs={'class': 'links-download'})
-    # print(value)
-    # print(type(value))
     links = []
     for val in value:
         if val.name != None and val['href'][0] == 'h':
@@ -26,7 +21,6 @@ def lista():
     tag = 'menu-item-object-custom'
     page = requests.get(url)
     page_soup = BeautifulSoup(page.content, 'html.parser')
-    # = page_soup.find(attrs={'class': 'menu'})
     value = page_soup.find_all("ul", class_="menu")[1]
     value = value.find_all('a')
     links = []
@@ -49,7 +43,6 @@ def downloads_collection(url):
     for indexI in range(0,len(links)):
         print(indexI, '>', links[indexI])
     return links
-    #value =  page_soup.find(attrs={'class': 'su-post-title'})
 
 def show_disp(lista):
     names_uni = []
@@ -69,13 +62,12 @@ def download_cbr(url, file_name):
     opener=urllib.request.build_opener()
     opener.addheaders=[('User-Agent','Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1941.0 Safari/537.36')]
     urllib.request.install_opener(opener)
-    urllib.request.urlretrieve(url,'downloads/'+file_name+'.cbr')
+    url = quote(url.replace("http://", ""))
+    url = f"http://{url}"
+    urllib.request.urlretrieve(url,'downloads/'+file_name.strip().replace(" ", "")+'.cbr')
     print('downloads/'+file_name+'.cbr')
 
 
-# repositiorio = reoordenando(lista())
-# downloads_collection()
-#download_cbr(get_link_downloads(url)[0])
 def show_content(lista):
     pattern = re.compile(r'(http:\/\/baixarquadrinhos.com\/)((ler)(-hq|-manga|-online|-onlline)(-quadrinho|-online))')
     names = []
@@ -109,7 +101,7 @@ def main():
     
     print('DESEJA BAIXAR TUDO: Y/n')
     value_input = str(input())
-    if(value_input == 'Y'):
+    if(value_input.upper() == 'Y'):
         for indexI in range(0, len(conteudos_disp)):
             download_cbr(get_link_downloads(conteudos_disp[indexI])[0], names[indexI])
     else:    
